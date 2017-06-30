@@ -7,7 +7,7 @@ A simple facebook generating class based on [FPDF](http://www.fpdf.org/).
 Via Composer
 
 ``` bash
-$ composer require xu-li/facebook
+$ composer require xu/facebook
 ```
 
 ## Usage
