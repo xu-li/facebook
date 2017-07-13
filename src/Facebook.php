@@ -101,21 +101,45 @@ class Facebook extends \FPDF implements ICellRenderer
     protected function renderUserImage(User $user, Cell $cell)
     {
         // draw image
-        if (!$user->image) {
+        if (!$user->image || !file_exists($user->image)) {
             return ;
         }
 
         list($width, $height) = $cell->getSizeWithoutPaddings();
         
-        $image_width  = $user->image_size[0] == 0 ? $width : $user->image_size[0];
-        $image_height = $user->image_size[1];
+        $box_width  = $user->image_size[0] == 0 ? $width : $user->image_size[0];
+        $box_height = $user->image_size[1];
+        $box_ratio  = $box_width / $box_height;
+
+        // file size
+        $info = @getimagesize($user->image);
+
+        if (!$info) {
+            return ;
+        }
+
+        $epsilon  = 0.00001;
+        $offset_x = 0;
+        $offset_y = 0;
+
+        // scale image to fit into box
+        $image_ratio = $info[0] / $info[1];
+        if (abs($box_ratio - $image_ratio) > $epsilon) {
+            if ($box_ratio > $image_ratio) {
+                $offset_x  = ($box_width - $box_height * $image_ratio) / 2;
+                $box_width = $box_height * $image_ratio;
+            } else {
+                $offset_y  = ($box_height - $box_width / $image_ratio) / 2;
+                $box_height = $box_width / $image_ratio;
+            }
+        }
 
         $this->Image(
             $user->image,
-            $cell->x + $cell->paddings[3] + ($width - $image_width) / 2,
-            $cell->y + $cell->paddings[0],
-            $image_width,
-            $image_height
+            $cell->x + $cell->paddings[3] + ($width - $box_width) / 2 + $offset_x,
+            $cell->y + $cell->paddings[0] + $offset_y,
+            $box_width,
+            $box_height
         );
     }
 
@@ -232,7 +256,7 @@ class Facebook extends \FPDF implements ICellRenderer
         foreach ($this->chapters as $chapter => $pages) {
             $num_pages = count($pages);
 
-            if ($num_pages < $page) {
+            if ($num_pages <= $page) {
                 $page -= $num_pages;
             } else {
                 $index = $cell->col + $cell->row * $this->getCols();
