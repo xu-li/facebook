@@ -18,17 +18,13 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "ext-gd": "*"
+        "ext-gd": "*",
+        "setasign/fpdf": "1.8.1"
     },
     "require-dev": {
         "phpunit/phpunit" : "4.*"
     },
     "autoload": {
-        "classmap": [
-            "lib/fpdf181/fpdf.php",
-            "lib/fpdf181/font/"
-        ],
-        
         "psr-4": {
             "Xu\\Facebook\\": "src"
         }
